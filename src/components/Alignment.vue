@@ -7,51 +7,54 @@
         </div>
 
         <!-- Data Sections -->
-        <div v-for="(group, index) in data" :key="index" class="mb-4">
+        <div v-for="(group, index) in data" :key="index" class="mb-3">
             <!-- Visual Group Header -->
-            <div class="text-[16px] mb-2 px-4 sm:px-2 mx-4">
-                Visual Group {{ index + 1 }}
+            <div class="flex items-center justify-between mb-1 px-4 sm:px-2 mx-4">
+                <div class="text-[16px]">Visual Group {{ index + 1 }}</div>
+                <div class="text-[15px] italic text-[#1A6840] mr-4">{{ group.subtask_relation }}</div>
             </div>
             <div class="border-2 border-dashed border-[#A7535A] px-4 sm:px-2 mx-4 w-[calc(100%-3rem)] rounded-lg">
 
                 <!-- Subtitle Section -->
-                <div class="mb-4">
+                <div class="mb-3">
                     <div class="text-[15px] font-semibold mb-1">subtitle:</div>
-                    <div contenteditable="true" class="text-[14px] leading-4 bg-white px-2 py-2 rounded-lg w-full focus:outline-none" @input="$emit('update:data', data.map((g, i) => i === index ? {...g, subtitle: ($event.target as HTMLElement).textContent || ''} : g))">
+                    <div contenteditable="true" class="text-[14px] leading-4 bg-white px-2 py-1 rounded-lg w-full focus:outline-none" @input="$emit('update:data', data.map((g, i) => i === index ? {...g, subtitle: ($event.target as HTMLElement).textContent || ''} : g))">
                         {{ group.subtitle }}
                     </div>
                 </div>
 
                 <!-- Knowledge Sections -->
-                <div v-for="(knowledge, kIndex) in Object.values(JSON.parse(group.knowledge)) as Knowledge[]" :key="kIndex" class="mb-4 bg-[#E5D5D9] rounded-lg w-full">
-                    <div class="text-[15px] font-semibold mb-1 px-2 pt-2">knowledge{{ kIndex + 1 }}:</div>
+                <div v-for="(knowledge, kIndex) in Object.values(JSON.parse(group.knowledge)) as Knowledge[]" :key="kIndex" class="mb-3 bg-[#E5D5D9] rounded-lg w-full">
+                    <div class="px-2 pt-1 flex items-center justify-between mb-1">
+                        <div class="text-[15px] font-semibold">knowledge{{ kIndex + 1 }}:</div>
+                        <div class="flex gap-4">
+                            <button @click="applyFormat(kIndex, 'H1')" class="text-[13px] font-bold italic text-red-600 hover:text-red-700">H1</button>
+                            <button @click="applyFormat(kIndex, 'H2')" class="text-[13px] font-bold italic text-black hover:text-gray-700">H2</button>
+                            <button @click="applyFormat(kIndex, 'Icon')" class="text-[13px] italic bg-[#FFFBBC] text-black hover:bg-yellow-500">Icon</button>
+                        </div>
+                    </div>
                     <div class="px-2 pb-2 flex gap-4">
                         <div class="flex-1">
-                            <div class="flex gap-2 mb-2">
-                                <button @click="applyFormat(kIndex, 'H1')" class="text-[13px] text-Red px-2 py-1 rounded hover:bg-red-700">H1</button>
-                                <button @click="applyFormat(kIndex, 'H2')" class="text-[13px] text-black px-2 py-1 rounded hover:bg-gray-700">H2</button>
-                                <button @click="applyFormat(kIndex, 'Icon')" class="text-[13px] bg-yellow-400 text-black px-2 py-1 rounded hover:bg-yellow-500">Icon</button>
-                            </div>
                         <!-- Knowledge Content -->
-                        <div class="text-[14px] leading-4 bg-white px-2 py-2 rounded-lg mb-4">
-                            <div contenteditable="true" class="text-[14px] bg-white px-2 py-2 rounded-lg mb-4 w-full focus:outline-none" v-html="knowledge.Knowledge_content
+                        <div class="text-[14px] leading-4 bg-white px-2 py-1 rounded-lg mb-2">
+                            <div contenteditable="true" class="text-[14px] font-normal font-black bg-white px-0 py-0 rounded-lg w-full focus:outline-none" v-html="knowledge.Knowledge_content
                                 .replace(new RegExp(knowledge.First_level_Highlight, 'g'), '<span class=\'font-bold text-red-600\'>' + knowledge.First_level_Highlight + '</span>')
-                                .replace(new RegExp(knowledge.Second_level_Highlight, 'g'), '<span class=\'font-bold\'>' + knowledge.Second_level_Highlight + '</span>')
+                                .replace(new RegExp(knowledge.Second_level_Highlight, 'g'), '<span class=\'font-bold font-black\'>' + knowledge.Second_level_Highlight + '</span>')
                                 .replace(new RegExp(knowledge.Icon_Keyword, 'g'), '<span class=\'bg-[#FFFBBC]\'>' + knowledge.Icon_Keyword + '</span>')"></div>
                         </div>
                         
                         <!-- Bottom Section -->
-                        <div class="flex gap-4">
+                        <div class="flex gap-10">
                             <!-- Keyword Section -->
-                            <div class="flex-1">
+                            <div class="flex flex-col">
                                 <div class="text-[15px] font-semibold mb-1">Keyword:</div>
-                                <textarea v-model="knowledge.Icon_Keyword" @input="$emit('update:data', data.map((g, i) => i === index ? {...g, knowledge: JSON.stringify({...JSON.parse(g.knowledge), ['Knowledge_' + (kIndex + 1)]: {...JSON.parse(g.knowledge)['Knowledge_' + (kIndex + 1)], Icon_Keyword: ($event.target as HTMLTextAreaElement).value}})} : g))" class="bg-white text-[14px] rounded-lg w-full px-2 py-2 focus:outline-none resize-y"></textarea>
+                                <textarea @input="$emit('update:data', data.map((g, i) => i === index ? {...g, knowledge: JSON.stringify({...JSON.parse(g.knowledge), ['Knowledge_' + (kIndex + 1)]: {...JSON.parse(g.knowledge)['Knowledge_' + (kIndex + 1)], Icon_Keyword: ($event.target as HTMLTextAreaElement).value}})} : g))" class="bg-white text-[14px] rounded-lg w-full px-2 py-2 focus:outline-none resize-none h-[60px]"></textarea>
                             </div>
                             
                             <!-- Visualization Section -->
-                            <div class="flex-1">
+                            <div class="flex flex-col">
                                 <div class="text-[15px] font-semibold mb-1">Visualization:</div>
-                                <div class="bg-white aspect-square rounded-lg"></div>
+                                <div class="bg-white rounded-lg w-[60px] h-[60px]"></div>
                             </div>
                         </div>
                     </div>
@@ -59,11 +62,8 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
-
-</div>
-
-
 </template>
 
 <script setup lang="ts">
@@ -78,6 +78,7 @@ interface Knowledge {
 interface GroupData {
     subtitle: string
     knowledge: string
+    subtask_relation?: string
 }
 
 withDefaults(defineProps<{
@@ -88,6 +89,9 @@ withDefaults(defineProps<{
     data: () => [
         {
             subtitle: 'Global casualties overview xxxxxxxxxxxxxxxxx',
+            subtask_relation: 'Generalization',
+            related_subtask_title: "None",
+            related_subtask_relation: "None",
             knowledge: JSON.stringify({
                 Knowledge_1: {
                     Knowledge_content: '60 to 80 million people died in World War II.',
@@ -107,6 +111,9 @@ withDefaults(defineProps<{
         },
         {
             subtitle: 'Holocaust victims',
+            subtask_relation: 'Elobration',
+            related_subtask_title: "Global casualties overview xxxxxxxxxxxxxxxxx",
+            related_subtask_relation: "Example",
             knowledge: JSON.stringify({
                 Knowledge_1: {
                     Knowledge_content: '6 million Jews died during the Holocaust.',
@@ -127,6 +134,9 @@ withDefaults(defineProps<{
         },
         {
             subtitle: 'Major Battles Overview',
+            subtask_relation: 'Example',
+            related_subtask_title: "None",
+            related_subtask_relation: "None",
             knowledge: JSON.stringify({
                 Knowledge_1: {
                     Knowledge_content: 'The Battle of Stalingrad resulted in nearly 2 million casualties.',
@@ -150,6 +160,29 @@ withDefaults(defineProps<{
                     Icon_Keyword: 'troops'
                 }
             })
+        },
+        {
+            subtitle: 'xxxxxx',
+            subtask_relation: 'Elobration',
+            related_subtask_title: "Global casualties overview xxxxxxxxxxxxxxxxx",
+            related_subtask_relation: "Generalization",
+            knowledge: JSON.stringify({
+                Knowledge_1: {
+                    Knowledge_content: '6 million Jews died during the Holocaust.',
+                    Data_insight: 'Value',
+                    First_level_Highlight: '6 million',
+                    Second_level_Highlight: 'Jews',
+                    Icon_Keyword: 'Jews'
+                },
+                Knowledge_2: {
+                    Knowledge_content: 'The Holocaust accounted for two-thirds of European Jews.',
+                    Data_insight: 'Proportion',
+                    First_level_Highlight: 'two-thirds',
+                    Second_level_Highlight: 'European Jews',
+                    Icon_Keyword: 'Jews'
+                }
+        
+            })
         }
     ]
 })
@@ -161,42 +194,111 @@ const applyFormat = (kIndex: number, type: string) => {
   const selectedText = range.toString();
   if (!selectedText) return;
 
-  // Check if selection is already formatted
-  let parent: HTMLElement | null = range.commonAncestorContainer as HTMLElement;
-  while (parent && parent.nodeType !== Node.ELEMENT_NODE) {
-    parent = parent.parentElement;
+  if (type === 'H1') {
+    // 获取选中内容的父元素
+    const parentElement = range.commonAncestorContainer.parentElement;
+    
+    // 检查是否是红色加粗
+    const isRedBold = parentElement?.classList?.contains('font-bold') &&
+                     parentElement?.classList?.contains('text-red-600');
+    
+    // 创建新的文本节点
+    const textNode = document.createTextNode(selectedText);
+    
+    if (isRedBold) {
+      // 如果是红色加粗，转换为普通黑色
+      const normalSpan = document.createElement('span');
+      normalSpan.textContent = selectedText;
+      normalSpan.classList.add('font-normal', 'text-black');
+      range.deleteContents();
+      range.insertNode(normalSpan);
+    } else {
+      // 如果不是红色加粗，转换为红色加粗
+      const span = document.createElement('span');
+      span.textContent = selectedText;
+      span.classList.add('font-bold', 'text-red-600');
+      range.deleteContents();
+      range.insertNode(span);
+    }
+    
+    // 如果父元素有背景色，保留背景色
+    if (parentElement?.classList?.contains('bg-[#FFFBBC]')) {
+      const wrapperSpan = document.createElement('span');
+      wrapperSpan.classList.add('bg-[#FFFBBC]');
+      wrapperSpan.appendChild(range.extractContents());
+      range.insertNode(wrapperSpan);
+    }
+    
+    // 清除selection
+    selection.removeAllRanges();
+  } else if (type === 'H2') {
+    // 获取选中内容的父元素
+    const parentElement = range.commonAncestorContainer.parentElement;
+    
+    // 检查是否是黑色加粗
+    const isBlackBold = parentElement?.classList?.contains('font-bold') &&
+                       !parentElement?.classList?.contains('text-red-600');
+    
+    if (isBlackBold) {
+      // 如果是黑色加粗，转换为普通黑色
+      const normalSpan = document.createElement('span');
+      normalSpan.textContent = selectedText;
+      normalSpan.classList.add('font-normal', 'text-black');
+      range.deleteContents();
+      range.insertNode(normalSpan);
+    } else {
+      // 如果不是黑色加粗，转换为黑色加粗
+      const span = document.createElement('span');
+      span.textContent = selectedText;
+      span.classList.add('font-bold', 'text-black');
+      range.deleteContents();
+      range.insertNode(span);
+    }
+    
+    // 如果父元素有背景色，保留背景色
+    if (parentElement?.classList?.contains('bg-[#FFFBBC]')) {
+      const wrapperSpan = document.createElement('span');
+      wrapperSpan.classList.add('bg-[#FFFBBC]');
+      wrapperSpan.appendChild(range.extractContents());
+      range.insertNode(wrapperSpan);
+    }
+    
+    // 清除selection
+    selection.removeAllRanges();
+  } else if (type === 'Icon') {
+    // 获取选中内容的父元素
+    const parentElement = range.commonAncestorContainer.parentElement;
+    
+    if (!parentElement) return;
+    
+    // 检查是否有背景色
+    const hasBackground = parentElement.classList.contains('bg-[#FFFBBC]');
+    
+    // 获取当前文字样式
+    const isBold = parentElement.classList.contains('font-bold');
+    const isRed = parentElement.classList.contains('text-red-600');
+    const isBlack = parentElement.classList.contains('text-black');
+    
+    if (hasBackground) {
+      // 如果有背景色，移除背景色
+      parentElement.classList.remove('bg-[#FFFBBC]');
+    } else {
+      // 如果没有背景色，添加背景色
+      const span = document.createElement('span');
+      span.textContent = selectedText;
+      span.classList.add('bg-[#FFFBBC]');
+      
+      // 强制保留原有文字样式
+      if (isBold) span.classList.add('font-bold');
+      if (isRed) span.classList.add('text-red-600');
+      if (isBlack) span.classList.add('text-black');
+      
+      range.deleteContents();
+      range.insertNode(span);
+    }
+    
+    // 清除selection
+    selection.removeAllRanges();
   }
-  
-  const isAlreadyFormatted = parent?.classList?.contains('font-bold') &&
-                           parent?.classList?.contains('text-red-600');
-
-  let formattedText = selectedText;
-  switch (type) {
-    case 'H1':
-      if (isAlreadyFormatted) {
-        // Remove formatting by replacing with plain text
-        const textNode = document.createTextNode(parent?.textContent || selectedText);
-        parent?.replaceWith(textNode);
-        return;
-      } else {
-        // Apply formatting
-        formattedText = `<span class="font-bold text-red-600">${selectedText}</span>`;
-      }
-      break;
-    case 'H2':
-      formattedText = `<span class="font-bold">${selectedText}</span>`;
-      break;
-    case 'Icon':
-      formattedText = `<span class="bg-[#FFFBBC]">${selectedText}</span>`;
-      break;
-  }
-
-  const span = document.createElement('span');
-  span.innerHTML = formattedText;
-  range.deleteContents();
-  range.insertNode(span);
-  
-  // Normalize text nodes to prevent nested spans
-  container.parentElement?.normalize();
 };
 </script>
