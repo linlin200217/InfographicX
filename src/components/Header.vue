@@ -66,7 +66,7 @@ const handleUpload = async () => {
   formData.append('question', inputValue.value)
 
   try {
-    const response = await fetch('http://61.155.234.170:40518/upload', {
+    const response = await fetch('http://61.155.234.170:40519/upload', {
       method: 'POST',
       body: formData
     })

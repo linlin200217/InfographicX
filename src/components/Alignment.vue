@@ -1,5 +1,6 @@
 <template>
-    <div class="h-full w-full bg-[#EDE3E7] rounded-r-lg pt-2 flex flex-col overflow-hidden">
+    <div class="h-full w-full bg-[#EDE3E7] rounded-r-lg relative pt-2 flex flex-col overflow-hidden">
+        <img src="../assets/Document.png" alt="Document" class="absolute top-1 left-1 w-4 h-4">
         <div class="overflow-y-auto flex-1 pl-0 pr-7">
         <!-- Original Title Box -->
         <div class="bg-white px-4 sm:px-6 mx-4 w-[calc(100%-rem)] rounded-lg mb-4">

@@ -8,3 +8,8 @@
 </script>
 
 <style scoped></style>
+
+{
+    "background": 1200*628
+    ""
+}
