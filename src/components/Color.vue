@@ -171,7 +171,7 @@ interface StyleData {
   Text_Font: string
 }
 
-const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Georgia', 'Gill Sans', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Trattatello', 'fantasy', 'Marker Felt', 'Chalkduster']
+const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS' ]
 
 const styleData = ref<StyleData>({
   First_level_Color: [153, 0, 0],

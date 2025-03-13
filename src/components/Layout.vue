@@ -23,7 +23,7 @@
 import { ref } from 'vue'
 
 const recommendation = ref({
-    Recommendation: 'Spiral'
+    Recommendation: 'Star'
 })
 
 const images = ref([
