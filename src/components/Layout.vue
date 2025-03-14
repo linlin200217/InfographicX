@@ -4,11 +4,12 @@
         
         <div class="flex">
             <div class="flex flex-col space-y-2 pl-4 relative">
-                <div v-for="img in images" :key="img.name" 
-                     :class="{'order-first': img.name === recommendation.Recommendation}">
+                <!-- 根据推荐顺序排序图片，并确保Yellowstar显示在第一个图片上方 -->
+                <div v-for="(img, index) in sortedImages" :key="img.name" 
+                     :class="{'order-first': index === 0}">
                     <img :src="img.src" alt="" class="w-10.5 h-13">
                 </div>
-                <img v-if="recommendation.Recommendation" 
+                <img v-if="sortedImages.length > 0" 
                      src="../assets/Yellowstar.png" 
                      alt="" 
                      class="absolute -top-2 left-11.5 w-5 h-5">
@@ -20,12 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue';
 
-const recommendation = ref({
-    Recommendation: 'Star'
-})
+// 更新推荐列表为数组
+const recommendation = ref(['Star', 'PortraitGrid', 'Spiral', 'Grid', 'Portrait', 'Landscape']);
 
+// 图片数组
 const images = ref([
     { name: 'Star', src: new URL('../assets/Star.png', import.meta.url).href },
     { name: 'Grid', src: new URL('../assets/Grid.png', import.meta.url).href },
@@ -33,7 +34,14 @@ const images = ref([
     { name: 'Portrait', src: new URL('../assets/Portrait.png', import.meta.url).href },
     { name: 'Landscape', src: new URL('../assets/Landscape.png', import.meta.url).href },
     { name: 'Spiral', src: new URL('../assets/Spiral.png', import.meta.url).href }
-])
+]);
+
+// 根据推荐顺序对图片进行排序
+const sortedImages = computed(() => {
+    return images.value.sort((a, b) => {
+        return recommendation.value.indexOf(a.name) - recommendation.value.indexOf(b.name);
+    });
+});
 </script>
 
 <style scoped>

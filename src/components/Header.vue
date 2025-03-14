@@ -13,6 +13,21 @@
           <div class="h-7 w-7 border-2 border-dashed border-[#E2E1E4] ml-2 rounded-[20%] flex items-center justify-center">
               <img v-if="showFileIcon" src="/src/assets/File.png" class="h-5 w-5" />
           </div>
+          <!-- 新增两个小输入框，默认值分别为1200和628，中间用"×"连接 -->
+          <div class="flex items-center ml-4">
+            <input
+              type="number"
+              placeholder="1200"
+              class="h-[20px] w-[60px] text-center rounded-md bg-white text-[#333333] placeholder:text-gray-300 text-sm focus:outline-none"
+            />
+            <span class="mx-2 text-white">×</span>
+            <input
+              type="number"
+              placeholder="628"
+              class="h-[20px] w-[60px] text-center rounded-md bg-white text-[#333333] placeholder:text-gray-300 text-sm focus:outline-none"
+            />
+            <span class="mx-2 text-white">px</span>
+          </div>
           <div class="relative w-[1100px] ml-[100px]">
             <input
               type="text"
@@ -54,67 +69,67 @@ const isButtonEnlarged = ref(false)
 const emit = defineEmits(['upload-success', 'upload-error'])
 
 const handleUpload = async () => {
-if (!fileInput.value?.files?.[0]) {
-  alert('请先选择PDF文件')
-  return
-}
-
-if (!inputValue.value.trim()) {
-  alert('请输入问题')
-  return
-}
-
-const formData = new FormData()
-formData.append('file', fileInput.value.files[0])
-formData.append('question', inputValue.value)
-
-try {
-  const response = await fetch('http://61.155.234.170:40529/upload', {
-    method: 'POST',
-    body: formData
-  })
-  
-
-  if (!response.ok) {
-    throw new Error('上传失败')
+  if (!fileInput.value?.files?.[0]) {
+    alert('请先选择PDF文件')
+    return
   }
 
-  const result = await response.json()
-  console.log('上传成功:', result)
-  alert('上传成功')
-  
-  // 发射上传成功事件，将结果传递给父组件
-  emit('upload-success', result)
-} catch (error) {
-  console.error('上传失败:', error)
-  alert('上传失败，请重试')
-  
-  // 发射上传失败事件，将错误信息传递给父组件
-  emit('upload-error', error)
-}
+  if (!inputValue.value.trim()) {
+    alert('请输入问题')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', fileInput.value.files[0])
+  formData.append('question', inputValue.value)
+
+  try {
+    const response = await fetch('http://61.155.234.170:40530/upload', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      throw new Error('上传失败')
+    }
+
+    const result = await response.json()
+    console.log('上传成功:', result)
+    alert('上传成功')
+    
+    // 发射上传成功事件，将结果传递给父组件
+    emit('upload-success', result)
+  } catch (error) {
+    console.error('上传失败:', error)
+    alert('上传失败，请重试')
+    
+    // 发射上传失败事件，将错误信息传递给父组件
+    emit('upload-error', error)
+  }
 }
 
 defineExpose({
-fileInput,
-showFileIcon,
-isIconEnlarged,
-inputValue,
-isButtonEnlarged,
-handleUpload
+  fileInput,
+  showFileIcon,
+  isIconEnlarged,
+  inputValue,
+  isButtonEnlarged,
+  handleUpload
 })
 
 const triggerFileInput = () => {
-fileInput.value?.click()
+  fileInput.value?.click()
 }
 
 const handleFileUpload = (event: Event) => {
-const target = event.target as HTMLInputElement
-const file = target.files?.[0]
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
 
-if (file && file.type === 'application/pdf') {
-  showFileIcon.value = true
-}
+  if (file && file.type === 'application/pdf') {
+    showFileIcon.value = true
+  }
 }
 </script>
+
 <style scoped>
 </style>

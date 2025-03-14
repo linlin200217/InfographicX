@@ -151,15 +151,21 @@ const hexToRgb = (hex: string): number[] => {
   return [r, g, b]
 }
 
+// 新的数据格式
+const jsonData = ref({
+  "themeColors": [[45, 32, 27], [78, 64, 55], [134, 86, 52], [92, 109, 125]],
+  "backgroundColor": [255, 255, 255],
+  "First_level_Color": [45, 32, 27],
+  "First_level_Font": "Verdana",
+  "Second_level_Color": [78, 64, 55],
+  "Second_level_Font": "Arial",
+  "Text_Color": [51, 51, 58],
+  "Text_Font": "Gill Sans"
+})
+
 // 模拟数据：主题色和背景色
-const themeColors = ref([
-  [0, 51, 102],
-  [153, 0, 0],
-  [255, 204, 0],
-  [102, 153, 153],
-  [204, 102, 0]
-])
-const backgroundColor = ref([240, 240, 240])
+const themeColors = ref(jsonData.value.themeColors)
+const backgroundColor = ref(jsonData.value.backgroundColor)
 
 // 模拟数据：文本样式（H1、H2、Text）相关颜色和字体
 interface StyleData {
@@ -174,12 +180,12 @@ interface StyleData {
 const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS' ]
 
 const styleData = ref<StyleData>({
-  First_level_Color: [153, 0, 0],
-  First_level_Font: "Gill Sans",
-  Second_level_Color: [0, 51, 102],
-  Second_level_Font: "Gill Sans",
-  Text_Color: [0, 0, 0],
-  Text_Font: "Gill Sans"
+  First_level_Color: jsonData.value.First_level_Color,
+  First_level_Font: jsonData.value.First_level_Font,
+  Second_level_Color: jsonData.value.Second_level_Color,
+  Second_level_Font: jsonData.value.Second_level_Font,
+  Text_Color: jsonData.value.Text_Color,
+  Text_Font: jsonData.value.Text_Font
 })
 
 defineExpose({
