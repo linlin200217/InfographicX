@@ -18,6 +18,8 @@ declare module 'vue' {
     Layer: typeof import('./src/components/Layer.vue')['default']
     Layout: typeof import('./src/components/Layout.vue')['default']
     Modification: typeof import('./src/components/Modification.vue')['default']
+    Notification: typeof import('./src/components/Notification.vue')['default']
+    StyleImporter: typeof import('./src/components/StyleImporter.vue')['default']
     Submission: typeof import('./src/components/Submission.vue')['default']
     Tree: typeof import('./src/components/Tree.vue')['default']
   }

@@ -34,13 +34,13 @@
                 @click="showPicker = false"
                 class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
               >
-                Cancel
+                取消
               </button>
               <button
                 @click="applyColor"
                 class="px-4 py-2 text-sm text-white bg-[#A7535A] hover:bg-[#720C0C] rounded"
               >
-                Confirm
+                确认
               </button>
             </div>
           </div>
@@ -73,6 +73,7 @@
         ></div>
         <select
           v-model="styleData.First_level_Font"
+          @change="styleStore.updateFirstLevelFont(styleData.First_level_Font)"
           class="bg-[#ffffff] rounded-lg px-2 py-0.5 w-20 max-w-[35px] overflow-hidden"
         >
           <option v-for="font in availableFonts" :key="font" :value="font">
@@ -94,6 +95,7 @@
         ></div>
         <select
           v-model="styleData.Second_level_Font"
+          @change="styleStore.updateSecondLevelFont(styleData.Second_level_Font)"
           class="bg-[#ffffff] rounded-lg px-2 py-0.5 w-20 max-w-[35px] overflow-hidden"
         >
           <option v-for="font in availableFonts" :key="font" :value="font">
@@ -115,6 +117,7 @@
         ></div>
         <select
           v-model="styleData.Text_Font"
+          @change="styleStore.updateTextFont(styleData.Text_Font)"
           class="bg-[#ffffff] rounded-lg px-2 py-0.5 w-20 max-w-[35px] overflow-hidden"
         >
           <option v-for="font in availableFonts" :key="font" :value="font">
@@ -127,47 +130,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { Chrome } from '@ckpack/vue-color'
+import { useStyleStore } from '../stores/styleStore'
 
-// 辅助函数：RGB 数组转 hex 字符串
-const rgbToHex = (rgb: number[]): string => {
-  return '#' + rgb.map(x => {
-    const hex = x.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-  }).join('')
-}
+// 使用样式store
+const styleStore = useStyleStore()
 
-// 辅助函数：hex 字符串转 RGB 数组
-const hexToRgb = (hex: string): number[] => {
-  hex = hex.replace(/^#/, '')
-  if (hex.length === 3) {
-    hex = hex.split('').map(ch => ch + ch).join('')
-  }
-  const bigint = parseInt(hex, 16)
-  const r = (bigint >> 16) & 255
-  const g = (bigint >> 8) & 255
-  const b = bigint & 255
-  return [r, g, b]
-}
+// 可用字体列表
+const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS' ]
 
-// 新的数据格式
-const jsonData = ref({
-  "themeColors": [[45, 32, 27], [78, 64, 55], [134, 86, 52], [92, 109, 125]],
-  "backgroundColor": [255, 255, 255],
-  "First_level_Color": [45, 32, 27],
-  "First_level_Font": "Verdana",
-  "Second_level_Color": [78, 64, 55],
-  "Second_level_Font": "Arial",
-  "Text_Color": [51, 51, 58],
-  "Text_Font": "Gill Sans"
-})
+// 为了兼容模板中的变量名，创建计算属性
+const themeColors = computed(() => styleStore.themeColors)
+const backgroundColor = computed(() => styleStore.backgroundColor)
 
-// 模拟数据：主题色和背景色
-const themeColors = ref(jsonData.value.themeColors)
-const backgroundColor = ref(jsonData.value.backgroundColor)
-
-// 模拟数据：文本样式（H1、H2、Text）相关颜色和字体
+// 文本样式（H1、H2、Text）相关颜色和字体
 interface StyleData {
   First_level_Color: number[]
   First_level_Font: string
@@ -177,17 +154,37 @@ interface StyleData {
   Text_Font: string
 }
 
-const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS' ]
-
-const styleData = ref<StyleData>({
-  First_level_Color: jsonData.value.First_level_Color,
-  First_level_Font: jsonData.value.First_level_Font,
-  Second_level_Color: jsonData.value.Second_level_Color,
-  Second_level_Font: jsonData.value.Second_level_Font,
-  Text_Color: jsonData.value.Text_Color,
-  Text_Font: jsonData.value.Text_Font
+// 创建一个响应式对象来映射store中的数据到组件中使用的格式
+const styleData = reactive<StyleData>({
+  First_level_Color: styleStore.firstLevelColor,
+  First_level_Font: styleStore.firstLevelFont,
+  Second_level_Color: styleStore.secondLevelColor,
+  Second_level_Font: styleStore.secondLevelFont,
+  Text_Color: styleStore.textColor,
+  Text_Font: styleStore.textFont
 })
 
+// 监听store中的数据变化，更新本地styleData
+styleStore.$subscribe((mutation, state) => {
+  styleData.First_level_Color = state.firstLevelColor
+  styleData.First_level_Font = state.firstLevelFont
+  styleData.Second_level_Color = state.secondLevelColor
+  styleData.Second_level_Font = state.secondLevelFont
+  styleData.Text_Color = state.textColor
+  styleData.Text_Font = state.textFont
+})
+
+// 监听本地styleData变化，更新store
+const updateStoreFromStyleData = () => {
+  styleStore.updateFirstLevelColor(styleData.First_level_Color)
+  styleStore.updateFirstLevelFont(styleData.First_level_Font)
+  styleStore.updateSecondLevelColor(styleData.Second_level_Color)
+  styleStore.updateSecondLevelFont(styleData.Second_level_Font)
+  styleStore.updateTextColor(styleData.Text_Color)
+  styleStore.updateTextFont(styleData.Text_Font)
+}
+
+// 暴露可用字体
 defineExpose({
   availableFonts
 })
@@ -209,22 +206,22 @@ const openPicker = (index: number) => {
   currentColorIndex.value = index
   if (index === -1) {
     // 背景颜色
-    pickerColor.value = rgbToHex(backgroundColor.value)
+    pickerColor.value = styleStore.rgbToHex(backgroundColor.value)
   } else if (index === -2) {
     // 加号按钮：新增主题色，默认白色
     pickerColor.value = '#ffffff'
   } else if (index === -3) {
     // H1 颜色
-    pickerColor.value = rgbToHex(styleData.value.First_level_Color)
+    pickerColor.value = styleStore.rgbToHex(styleData.First_level_Color)
   } else if (index === -4) {
     // H2 颜色
-    pickerColor.value = rgbToHex(styleData.value.Second_level_Color)
+    pickerColor.value = styleStore.rgbToHex(styleData.Second_level_Color)
   } else if (index === -5) {
     // Text 颜色
-    pickerColor.value = rgbToHex(styleData.value.Text_Color)
+    pickerColor.value = styleStore.rgbToHex(styleData.Text_Color)
   } else {
     // 已存在的主题色
-    pickerColor.value = rgbToHex(themeColors.value[index])
+    pickerColor.value = styleStore.rgbToHex(themeColors.value[index])
   }
   showPicker.value = true
 }
@@ -237,32 +234,35 @@ const applyColor = () => {
   } else if (typeof pickerColor.value === 'string') {
     hexValue = pickerColor.value
   }
-  const newRgb = hexToRgb(hexValue)
+  const newRgb = styleStore.hexToRgb(hexValue)
   
   if (currentColorIndex.value === -1) {
     // 更新背景色
-    backgroundColor.value = newRgb
+    styleStore.updateBackgroundColor(newRgb)
   } else if (currentColorIndex.value === -2) {
     // 新增主题色
-    themeColors.value.push(newRgb)
+    styleStore.addThemeColor(newRgb)
   } else if (currentColorIndex.value === -3) {
     // 更新 H1 颜色
-    styleData.value.First_level_Color = newRgb
+    styleData.First_level_Color = newRgb
+    styleStore.updateFirstLevelColor(newRgb)
   } else if (currentColorIndex.value === -4) {
     // 更新 H2 颜色
-    styleData.value.Second_level_Color = newRgb
+    styleData.Second_level_Color = newRgb
+    styleStore.updateSecondLevelColor(newRgb)
   } else if (currentColorIndex.value === -5) {
     // 更新 Text 颜色
-    styleData.value.Text_Color = newRgb
+    styleData.Text_Color = newRgb
+    styleStore.updateTextColor(newRgb)
   } else {
     // 更新已存在的主题色
-    themeColors.value[currentColorIndex.value] = newRgb
+    styleStore.updateThemeColor(currentColorIndex.value, newRgb)
   }
   showPicker.value = false
 }
 
 // 删除主题色
 const removeColor = (index: number) => {
-  themeColors.value.splice(index, 1)
+  styleStore.removeThemeColor(index)
 }
 </script>

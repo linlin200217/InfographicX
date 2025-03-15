@@ -1,4 +1,5 @@
 <template>
+
   <div ref="containerRef" class="h-full w-full bg-[#EDE3E7] rounded-r-lg relative pt-2 flex flex-col overflow-hidden">
     <img src="../assets/Document.png" alt="Document" class="absolute top-1 left-1 w-4 h-4" />
     <!-- 滚动区域 -->
@@ -7,7 +8,7 @@
       <div class="bg-white px-4 sm:px-6 mx-4 w-[calc(100%-rem)] rounded-lg mb-4">
         <input
           :value="titleRef"
-          @input="$emit('update:title', ($event.target as HTMLInputElement).value)"
+          @input="updateTitle(($event.target as HTMLInputElement).value)"
           class="text-[15px] font-bold leading-5 w-full bg-transparent focus:outline-none"
         />
       </div>
@@ -47,9 +48,9 @@
             <div class="px-2 pt-1 flex items-center justify-between mb-1">
               <div class="text-[15px] font-semibold">knowledge{{ kIndex + 1 }}:</div>
               <div class="flex gap-4">
-                <button @click="applyFormat(kIndex, 'H1')" class="text-[13px] font-bold italic text-red-600 hover:text-red-700">H1</button>
-                <button @click="applyFormat(kIndex, 'H2')" class="text-[13px] font-bold italic text-black hover:text-gray-700">H2</button>
-                <button @click="applyFormat(kIndex, 'Icon')" class="text-[13px] italic bg-[#FFFBBC] text-black hover:bg-yellow-500">Icon</button>
+                <button @click="applyFormat(index, kIndex, 'H1')" class="text-[13px] font-bold italic text-red-600 hover:text-red-700">H1</button>
+                <button @click="applyFormat(index, kIndex, 'H2')" class="text-[13px] font-bold italic text-black hover:text-gray-700">H2</button>
+                <button @click="applyFormat(index, kIndex, 'Icon')" class="text-[13px] italic bg-[#FFFBBC] text-black hover:bg-yellow-500">Icon</button>
               </div>
             </div>
             <div class="px-2 pb-2 flex gap-4">
@@ -60,9 +61,10 @@
                     contenteditable="true"
                     class="text-[14px] font-normal font-black bg-white px-0 py-0 rounded-lg w-full focus:outline-none"
                     v-html="knowledge.knowledge_content
-                      .replace(new RegExp(knowledge.first_level_highlight, 'g'), '<span class=\'font-bold text-red-600\'>' + knowledge.first_level_highlight + '</span>')
-                      .replace(new RegExp(knowledge.second_level_highlight, 'g'), '<span class=\'font-bold font-black\'>' + knowledge.second_level_highlight + '</span>')
-                      .replace(new RegExp(knowledge.icon_keyword, 'g'), '<span class=\'bg-[#FFFBBC]\'>' + knowledge.icon_keyword + '</span>')"
+                      .replace(knowledge.first_level_highlight ? new RegExp(knowledge.first_level_highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g') : '', knowledge.first_level_highlight ? '<span class=\'font-bold text-red-600\'>' + knowledge.first_level_highlight + '</span>' : '')
+                      .replace(knowledge.second_level_highlight ? new RegExp(knowledge.second_level_highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g') : '', knowledge.second_level_highlight ? '<span class=\'font-bold font-black\'>' + knowledge.second_level_highlight + '</span>' : '')
+                      .replace(knowledge.icon_keyword ? new RegExp(knowledge.icon_keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g') : '', knowledge.icon_keyword ? '<span class=\'bg-[#FFFBBC]\'>' + knowledge.icon_keyword + '</span>' : '')"
+                    @input="updateKnowledgeContent(index, kIndex, $event)"
                   ></div>
                 </div>
 
@@ -71,7 +73,11 @@
                   <!-- Keyword Section -->
                   <div class="flex flex-col">
                     <div class="text-[15px] font-semibold mb-1">Keyword:</div>
-                    <textarea class="bg-white text-[14px] rounded-lg w-full px-2 py-2 focus:outline-none resize-none h-[60px]"></textarea>
+                    <textarea 
+                      :value="knowledge.icon_keyword"
+                      @input="updateKeyword(index, kIndex, $event)"
+                      class="bg-white text-[14px] rounded-lg w-full px-2 py-2 focus:outline-none resize-none h-[60px]"
+                    ></textarea>
                   </div>
                   <!-- Visualization Section -->
                   <div class="flex flex-col">
@@ -86,8 +92,26 @@
         </div>
       </div>
       <!-- Next Step Button -->
+      <div class="flex items-center ml-4">
+            <input
+              type="number"
+              placeholder="Height"
+              v-model="height"
+              class="h-[20px] w-[100px] text-center rounded-md bg-white text-[#333333] placeholder:text-gray-300 text-sm focus:outline-none"
+            />
+            <span class="mx-2 text-[#A7535A]">×</span>
+            <input
+              type="number"
+              placeholder="Width"
+              v-model="width"
+              class="h-[20px] w-[100px] text-center rounded-md bg-white text-[#333333] placeholder:text-gray-300 text-sm focus:outline-none"
+            />
+            <span class="mx-2 text-[#A7535A]">px</span>
+          </div>
+
+      
       <div class="flex justify-center mt-6 mb-6">
-        <button class="bg-[#9ABEAF] text-white px-6 py-1 rounded-lg">NEXT STEP</button>
+        <button class="bg-[#9ABEAF] text-white px-6 py-1 rounded-lg" @click="handleNextStep">NEXT STEP</button>
       </div>
       <!-- End Data Sections -->
     </div>
@@ -128,55 +152,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, toRef, watch } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
+import { useUploadStore } from '../stores/uploadStore';
+import type { GroupData, ConnectionPath, ConnectionLabel } from '../types';
+import { applyTextFormat, extractTextFromHtml } from '../utils/formatUtils';
+import { calculateConnections, findConnections } from '../utils/connectionUtils';
+import { syncDataUpdate, removeItem } from '../utils/storeUtils';
+import { useStyleStore } from '../stores/styleStore';
+import { useRankStore } from '../stores/rankStore';
+import { notify } from '../utils/notification'
+// 使用 Pinia store
+const uploadStore = useUploadStore();
+const styleStore = useStyleStore();
+const rankStore = useRankStore();
 
-interface Knowledge {
-  knowledge_content: string;
-  data_insight: string;
-  first_level_highlight: string;
-  second_level_highlight: string;
-  icon_keyword: string;
-}
 
-interface RelatedSubtask {
-  title: string | null;
-  relation: string | null;
-}
+// 从 store 获取标题
+const titleRef = ref<string>("");
 
-interface GroupData {
-  subtask_title: string;
-  subtask_content: string;
-  subtask_relation: string;
-  related_subtask: RelatedSubtask;
-  knowledges: Knowledge[];
-}
+// 从 store 获取数据并做深拷贝，作为组件内部的独立数据状态
+const localData = ref<GroupData[]>([]);
 
-// 定义 emit，并添加类型声明
-const emit = defineEmits<{
-  (event: 'update:title', value: string): void;
-  (event: 'update:data', value: GroupData[]): void;
-}>();
-
-// 定义 props 和默认值
-const props = withDefaults(defineProps<{
-  title?: string;
-  data?: GroupData[];
-}>(), {
-  title: "发生了什么：事件概述",
-  data: () => []
-});
-
-// 使用 toRef 保持 title 的响应性
-const titleRef = toRef(props, 'title');
-
-// 将 props.data 做一次深拷贝，作为组件内部的独立数据状态
-const localData = ref<GroupData[]>(props.data ? JSON.parse(JSON.stringify(props.data)) : []);
-
-// 监听 props.data 的变化，同步更新 localData
+// 监听 uploadStore.uploadResult 的变化，同步更新 localData 和 titleRef
 watch(
-  () => props.data,
-  (newData) => {
-    localData.value = newData ? JSON.parse(JSON.stringify(newData)) : [];
+  () => uploadStore.uploadResult,
+  (newResult) => {
+    if (newResult) {
+      titleRef.value = newResult.title || "";
+      localData.value = newResult.data ? JSON.parse(JSON.stringify(newResult.data)) : [];
+      // 更新连线
+      nextTick(() => {
+        updateConnections();
+      });
+    }
   },
   { deep: true, immediate: true }
 );
@@ -184,91 +192,129 @@ watch(
 // 修改关键字
 const updateKeyword = (groupIndex: number, knowledgeIndex: number, event: Event) => {
   const value = (event.target as HTMLTextAreaElement).value;
-  localData.value[groupIndex].knowledges[knowledgeIndex].icon_keyword = value;
-  emit('update:data', localData.value);
+  syncDataUpdate(
+    localData.value,
+    uploadStore.uploadResult?.data,
+    groupIndex,
+    knowledgeIndex,
+    'icon_keyword',
+    value
+  );
 };
 
 // 修改子标题
 const updateSubtitle = (groupIndex: number, event: Event) => {
   const value = (event.target as HTMLElement).textContent || '';
-  localData.value[groupIndex].subtask_title = value;
-  emit('update:data', localData.value);
+  syncDataUpdate(
+    localData.value,
+    uploadStore.uploadResult?.data,
+    groupIndex,
+    null,
+    'subtask_title',
+    value
+  );
 };
 
 // 应用格式化（H1、H2、Icon）
-const applyFormat = (kIndex: number, type: string) => {
+const applyFormat = (groupIndex: number, kIndex: number, type: string) => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
   const selectedText = range.toString();
   if (!selectedText) return;
-  if (type === 'H1') {
-    const parentElement = range.commonAncestorContainer.parentElement;
-    const isRedBold = parentElement?.classList?.contains('font-bold') && parentElement?.classList?.contains('text-red-600');
-    if (isRedBold) {
-      const normalSpan = document.createElement('span');
-      normalSpan.textContent = selectedText;
-      normalSpan.classList.add('font-normal', 'text-black');
-      range.deleteContents();
-      range.insertNode(normalSpan);
-    } else {
-      const span = document.createElement('span');
-      span.textContent = selectedText;
-      span.classList.add('font-bold', 'text-red-600');
-      range.deleteContents();
-      range.insertNode(span);
-    }
-    if (parentElement?.classList?.contains('bg-[#FFFBBC]')) {
-      const wrapperSpan = document.createElement('span');
-      wrapperSpan.classList.add('bg-[#FFFBBC]');
-      wrapperSpan.appendChild(range.extractContents());
-      range.insertNode(wrapperSpan);
-    }
-    selection.removeAllRanges();
-  } else if (type === 'H2') {
-    const parentElement = range.commonAncestorContainer.parentElement;
-    const isBlackBold = parentElement?.classList?.contains('font-bold') && !parentElement?.classList?.contains('text-red-600');
-    if (isBlackBold) {
-      const normalSpan = document.createElement('span');
-      normalSpan.textContent = selectedText;
-      normalSpan.classList.add('font-normal', 'text-black');
-      range.deleteContents();
-      range.insertNode(normalSpan);
-    } else {
-      const span = document.createElement('span');
-      span.textContent = selectedText;
-      span.classList.add('font-bold', 'text-black');
-      range.deleteContents();
-      range.insertNode(span);
-    }
-    if (parentElement?.classList?.contains('bg-[#FFFBBC]')) {
-      const wrapperSpan = document.createElement('span');
-      wrapperSpan.classList.add('bg-[#FFFBBC]');
-      wrapperSpan.appendChild(range.extractContents());
-      range.insertNode(wrapperSpan);
-    }
-    selection.removeAllRanges();
-  } else if (type === 'Icon') {
-    const parentElement = range.commonAncestorContainer.parentElement;
-    if (!parentElement) return;
-    const hasBackground = parentElement.classList.contains('bg-[#FFFBBC]');
-    const isBold = parentElement.classList.contains('font-bold');
-    const isRed = parentElement.classList.contains('text-red-600');
-    const isBlack = parentElement.classList.contains('text-black');
-    if (hasBackground) {
-      parentElement.classList.remove('bg-[#FFFBBC]');
-    } else {
-      const span = document.createElement('span');
-      span.textContent = selectedText;
-      span.classList.add('bg-[#FFFBBC]');
-      if (isBold) span.classList.add('font-bold');
-      if (isRed) span.classList.add('text-red-600');
-      if (isBlack) span.classList.add('text-black');
-      range.deleteContents();
-      range.insertNode(span);
-    }
-    selection.removeAllRanges();
+  
+  if (groupIndex < 0 || groupIndex >= localData.value.length) return;
+  
+  const parentElement = range.commonAncestorContainer.parentElement;
+  const formatResult = applyTextFormat(type, selectedText, parentElement);
+  
+  if (formatResult.element) {
+    range.deleteContents();
+    range.insertNode(formatResult.element);
   }
+  
+  // 更新数据
+  let field = '';
+  if (type === 'H1') {
+    field = 'first_level_highlight';
+  } else if (type === 'H2') {
+    field = 'second_level_highlight';
+  } else if (type === 'Icon') {
+    field = 'icon_keyword';
+  }
+  
+  if (field) {
+    const value = formatResult.isRemoved ? '' : selectedText;
+    
+    // 检查是否已经存在相同的高亮文本，避免重复添加
+    const knowledge = localData.value[groupIndex].knowledges[kIndex];
+    if (knowledge && !formatResult.isRemoved) {
+      // 如果已经存在相同的高亮文本，则不再添加
+      if ((field === 'first_level_highlight' && knowledge.first_level_highlight === value) ||
+          (field === 'second_level_highlight' && knowledge.second_level_highlight === value) ||
+          (field === 'icon_keyword' && knowledge.icon_keyword === value)) {
+        selection.removeAllRanges();
+        return;
+      }
+    }
+    
+    syncDataUpdate(
+      localData.value,
+      uploadStore.uploadResult?.data,
+      groupIndex,
+      kIndex,
+      field,
+      value
+    );
+  }
+  
+  // 保持背景色
+  if (parentElement?.classList?.contains('bg-[#FFFBBC]') && type !== 'Icon') {
+    const wrapperSpan = document.createElement('span');
+    wrapperSpan.classList.add('bg-[#FFFBBC]');
+    wrapperSpan.appendChild(range.extractContents());
+    range.insertNode(wrapperSpan);
+  }
+  
+  selection.removeAllRanges();
+  
+  // 强制更新视图
+  nextTick(() => {
+    if (uploadStore.uploadResult?.data) {
+      // 触发深层更新
+      uploadStore.uploadResult = { ...uploadStore.uploadResult };
+    }
+  });
+};
+
+// 修改知识内容
+const updateKnowledgeContent = (groupIndex: number, knowledgeIndex: number, event: Event) => {
+  // 获取纯文本内容（去除HTML标签）
+  const htmlContent = (event.target as HTMLElement).innerHTML;
+  const textContent = extractTextFromHtml(htmlContent);
+  
+  // 检查内容是否真的发生了变化
+  const currentKnowledge = localData.value[groupIndex]?.knowledges[knowledgeIndex];
+  if (currentKnowledge && currentKnowledge.knowledge_content === textContent) {
+    return; // 内容没有变化，不需要更新
+  }
+  
+  syncDataUpdate(
+    localData.value,
+    uploadStore.uploadResult?.data,
+    groupIndex,
+    knowledgeIndex,
+    'knowledge_content',
+    textContent
+  );
+  
+  // 强制更新视图
+  nextTick(() => {
+    if (uploadStore.uploadResult?.data) {
+      // 触发深层更新
+      uploadStore.uploadResult = { ...uploadStore.uploadResult };
+    }
+  });
 };
 
 const containerRef = ref<HTMLElement | null>(null);
@@ -276,86 +322,29 @@ const scrollContainerRef = ref<HTMLElement | null>(null);
 // 使用 Vue 3 多 ref 特性自动收集所有 visual group 的虚线框 DOM 节点
 const dashedRefs = ref<HTMLElement[]>([]);
 const svgRef = ref<SVGSVGElement | null>(null);
-const connectionPaths = ref<{ d: string }[]>([]);
-const connectionLabels = ref<{ x: number; y: number; text: string }[]>([]);
+const connectionPaths = ref<ConnectionPath[]>([]);
+const connectionLabels = ref<ConnectionLabel[]>([]);
 
 // 更新连线（动态根据 localData 及 dashedRefs.value 计算）
 const updateConnections = () => {
   nextTick(() => {
     if (!containerRef.value) return;
     const containerRect = containerRef.value.getBoundingClientRect();
-    const connections: { sourceIndex: number; targetIndex: number }[] = [];
-
-    // 根据每个 visual group 的 related_subtask 找出对应关系
-    localData.value.forEach((group: GroupData, targetIndex: number) => {
-      if (group.related_subtask && group.related_subtask.title) {
-        const sourceIndex = localData.value.findIndex(
-          (g: GroupData) => g.subtask_title === group.related_subtask!.title
-        );
-        if (sourceIndex !== -1 && sourceIndex !== targetIndex) {
-          connections.push({ sourceIndex, targetIndex });
-        }
+    
+    // 查找连接关系
+    const connections = findConnections(localData.value);
+    
+    // 计算连线路径和标签
+    const { paths, labels } = calculateConnections(connections, dashedRefs.value, containerRect);
+    
+    // 更新标签文本
+    labels.forEach((label, index) => {
+      const conn = connections[index];
+      if (conn) {
+        label.text = localData.value[conn.targetIndex].related_subtask?.relation || "";
       }
     });
-
-    // 按同一源组分组，便于计算多条连线的水平偏移
-    const grouped: Record<number, { targetIndex: number }[]> = {};
-    connections.forEach(conn => {
-      if (!grouped[conn.sourceIndex]) {
-        grouped[conn.sourceIndex] = [];
-      }
-      grouped[conn.sourceIndex].push({ targetIndex: conn.targetIndex });
-    });
-
-    const paths: { d: string }[] = [];
-    const labels: { x: number; y: number; text: string }[] = [];
-    const baseHorizontalOffset = 25; // 基础水平偏移
-    const horizontalOffsetStep = 5;  // 同源组内额外的水平偏移
-    const r = 10;                    // 圆角半径
-
-    connections.forEach(conn => {
-      const sourceEl = dashedRefs.value[conn.sourceIndex];
-      const targetEl = dashedRefs.value[conn.targetIndex];
-      if (!sourceEl || !targetEl) return;
-
-      const sourceRect = sourceEl.getBoundingClientRect();
-      const targetRect = targetEl.getBoundingClientRect();
-
-      const groupConnections = grouped[conn.sourceIndex];
-      const order = groupConnections.findIndex(item => item.targetIndex === conn.targetIndex);
-      const horizontalOffsetThis = baseHorizontalOffset + order * horizontalOffsetStep;
-
-      // 起点：源虚线框下1/3处（高度的 2/3）
-      const sourceX = sourceRect.right - containerRect.left;
-      const sourceY = sourceRect.top - containerRect.top + sourceRect.height * (2 / 3);
-
-      // 终点：目标虚线框上1/3处（高度的 1/3）
-      const targetX = targetRect.right - containerRect.left;
-      const targetY = targetRect.top - containerRect.top + targetRect.height * (1 / 3);
-
-      const horizontalEnd = sourceX + horizontalOffsetThis;
-
-      // 上拐角（外弧）
-      const topArc = `
-        M ${sourceX} ${sourceY}
-        L ${horizontalEnd - r} ${sourceY}
-        A ${r} ${r} 0 0 1 ${horizontalEnd} ${sourceY + r}
-      `;
-      // 下拐角（外弧）
-      const bottomArc = `
-        L ${horizontalEnd} ${targetY - r}
-        A ${r} ${r} 0 0 1 ${horizontalEnd - r} ${targetY}
-        L ${targetX} ${targetY}
-      `;
-      paths.push({ d: (topArc + bottomArc).trim() });
-
-      // 计算 label 位置：取下拐角中点并上移 5 像素
-      const labelX = ((horizontalEnd + r) + targetX) / 2 + 7;
-      const labelY = targetY - 10;
-      const labelText = localData.value[conn.targetIndex].related_subtask?.relation || "";
-      labels.push({ x: labelX, y: labelY, text: labelText });
-    });
-
+    
     connectionPaths.value = paths;
     connectionLabels.value = labels;
   });
@@ -363,17 +352,24 @@ const updateConnections = () => {
 
 // 删除指定 visual group，并同步更新数据
 const removeGroup = (groupIndex: number) => {
-  localData.value.splice(groupIndex, 1);
-  emit('update:data', localData.value);
+  removeItem(localData.value, uploadStore.uploadResult?.data, groupIndex);
   // 删除后更新连线
   updateConnections();
 };
 
 // 删除指定 knowledge，并同步更新数据
 const removeKnowledge = (groupIndex: number, knowledgeIndex: number) => {
-  localData.value[groupIndex].knowledges.splice(knowledgeIndex, 1);
-  emit('update:data', localData.value);
+  removeItem(localData.value, uploadStore.uploadResult?.data, groupIndex, knowledgeIndex);
   updateConnections();
+};
+
+// 更新标题
+const updateTitle = (value: string) => {
+  titleRef.value = value;
+  // 更新 store 中的数据
+  if (uploadStore.uploadResult) {
+    uploadStore.uploadResult.title = value;
+  }
 };
 
 onMounted(() => {
@@ -383,12 +379,42 @@ onMounted(() => {
     scrollContainerRef.value.addEventListener('scroll', updateConnections);
   }
 });
-
+const width = ref(628);
+const height = ref(1200);
+const handleNextStep = async() => {
+  console.log("handleNextStep");
+  try {
+    // 检查是否有上传结果
+    if (!uploadStore.uploadResult) {
+      notify.error('请先上传PDF文件并提交问题');
+      return;
+    }
+    // 生成颜色方案
+    console.log(uploadStore.uploadResult);
+    await styleStore.generateColors(uploadStore.uploadResult);
+    
+    // 获取信息图尺寸（这里使用默认尺寸，你可以根据实际需求调整）
+    const infographicSize: [number, number] = [width.value, height.value];
+    await rankStore.rankElements(uploadStore.uploadResult, infographicSize);
+  } catch (error) {
+    console.error('生成颜色方案或排序失败:', error);
+    notify.error('生成颜色方案或排序失败');
+  }
+}
 // 监听 localData 变化，更新连线
 watch(
   () => localData.value,
   () => {
     updateConnections();
+  },
+  { deep: true }
+);
+
+// 结果被修改就打印处理
+watch(
+  () => uploadStore.uploadResult,
+  (newResult) => {
+    console.log(`uploadStore.uploadResult: ${JSON.stringify(newResult)}`);
   },
   { deep: true }
 );

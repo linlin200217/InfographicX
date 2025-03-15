@@ -21,10 +21,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRankStore } from '../stores/rankStore';
 
-// 更新推荐列表为数组
-const recommendation = ref(['Star', 'PortraitGrid', 'Spiral', 'Grid', 'Portrait', 'Landscape']);
+// 使用rankStore
+const rankStore = useRankStore();
 
 // 图片数组
 const images = ref([
@@ -36,12 +37,26 @@ const images = ref([
     { name: 'Spiral', src: new URL('../assets/Spiral.png', import.meta.url).href }
 ]);
 
-// 根据推荐顺序对图片进行排序
+// 根据rankStore中的排名对图片进行排序
 const sortedImages = computed(() => {
-    return images.value.sort((a, b) => {
-        return recommendation.value.indexOf(a.name) - recommendation.value.indexOf(b.name);
-    });
+    // 如果rankStore中有排名数据，则使用它
+    if (rankStore.rankedElements.length > 0) {
+        return images.value.sort((a, b) => {
+            return rankStore.rankedElements.indexOf(a.name) - rankStore.rankedElements.indexOf(b.name);
+        });
+    } else {
+        // 默认排序（保留原有的推荐顺序作为后备）
+        const defaultOrder = [ 'PortraitGrid', 'Star','Spiral', 'Grid', 'Portrait', 'Landscape'];
+        return images.value.sort((a, b) => {
+            return defaultOrder.indexOf(a.name) - defaultOrder.indexOf(b.name);
+        });
+    }
 });
+
+// 监听rankStore.rankedElements的变化
+watch(() => rankStore.rankedElements, (newRankedElements) => {
+    console.log('排名已更新:', newRankedElements);
+}, { deep: true });
 </script>
 
 <style scoped>
