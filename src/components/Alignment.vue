@@ -44,7 +44,7 @@
           <!-- Knowledge Sections -->
           <div v-for="(knowledge, kIndex) in group.knowledges" :key="kIndex" class="mb-3 bg-[#E5D5D9] rounded-lg w-full relative">
             <!-- 删除当前 knowledge 的按钮 -->
-            <img src="../assets/Delete.png" alt="Delete" class="absolute -top-3 -right-2 w-4 h-4 cursor-pointer" @click="removeKnowledge(index, kIndex)" />
+            <img src="../assets/Delete.png" alt="Delete" class="absolute -top-2 -right-2 w-4 h-4 cursor-pointer" @click="removeKnowledge(index, kIndex)" />
             <div class="px-2 pt-1 flex items-center justify-between mb-1">
               <div class="text-[15px] font-semibold">knowledge{{ kIndex + 1 }}:</div>
               <div class="flex gap-4">
@@ -79,15 +79,24 @@
                       class="bg-white text-[14px] rounded-lg w-full px-2 py-2 focus:outline-none resize-none h-[60px]"
                     ></textarea>
                   </div>
-                  <!-- Visualization Section -->
-                  <div class="flex flex-col">
-                    <div class="text-[15px] font-semibold mb-1">Visualization:</div>
-                    <div class="bg-white rounded-lg w-[60px] h-[60px]"></div>
-                  </div>
-                </div>
+                    <!-- Visualization Section -->
+                    <!--Visualization :group="group" /-->
+                    <div class="flex flex-col">
+                      <div class="text-[15px] font-semibold mb-1">Visualization:</div>
+                      <!-- 用 Visualization 组件来渲染 d3 图表 -->
+            
+                      <div class="relative bg-white rounded-lg w-[60px] h-[60px]">
+                        <img src="../assets/Delete.png" alt="Delete" class="absolute -top-2 left-13 w-4 h-4 cursor-pointer" @click="deleteVisualization(index, kIndex)"/>
+                        <Visualization :visualization="group.knowledges[kIndex].visualization" />
+                      </div>
+                    </div>
+                  <!-- Visualization Section end -->
               </div>
             </div>
           </div>
+        </div>
+
+              
           <!-- End Knowledge Sections -->
         </div>
       </div>
@@ -149,9 +158,11 @@
       </text>
     </svg>
   </div>
+
 </template>
 
 <script setup lang="ts">
+//import Visualization from 'src/components/Visualization.vue';
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { useUploadStore } from '../stores/uploadStore';
 import type { GroupData, ConnectionPath, ConnectionLabel } from '../types';
@@ -160,7 +171,9 @@ import { calculateConnections, findConnections } from '../utils/connectionUtils'
 import { syncDataUpdate, removeItem } from '../utils/storeUtils';
 import { useStyleStore } from '../stores/styleStore';
 import { useRankStore } from '../stores/rankStore';
-import { notify } from '../utils/notification'
+import { notify } from '../utils/notification';
+import Visualization from '../components/Visualization.vue';
+
 // 使用 Pinia store
 const uploadStore = useUploadStore();
 const styleStore = useStyleStore();
@@ -363,6 +376,25 @@ const removeKnowledge = (groupIndex: number, knowledgeIndex: number) => {
   updateConnections();
 };
 
+//删除visualization
+const deleteVisualization = (groupIndex: number, knowledgeIndex: number) => {
+  const newVisualization = {
+    is_visualization: false,
+    type: null,
+    data: []
+  };
+  
+  // 更新 localData
+  localData.value[groupIndex].knowledges[knowledgeIndex].visualization = newVisualization;
+  
+  // 如果 uploadStore.uploadResult.data 存在，也进行相同更新
+  if (uploadStore.uploadResult?.data) {
+    uploadStore.uploadResult.data[groupIndex].knowledges[knowledgeIndex].visualization = newVisualization;
+  }
+  
+  updateConnections();
+};
+
 // 更新标题
 const updateTitle = (value: string) => {
   titleRef.value = value;
@@ -409,6 +441,7 @@ watch(
   },
   { deep: true }
 );
+
 
 // 结果被修改就打印处理
 watch(

@@ -53,6 +53,9 @@ const sortedImages = computed(() => {
     }
 });
 
+
+
+
 // 监听rankStore.rankedElements的变化
 watch(() => rankStore.rankedElements, (newRankedElements) => {
     console.log('排名已更新:', newRankedElements);

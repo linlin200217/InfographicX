@@ -22,5 +22,6 @@ declare module 'vue' {
     StyleImporter: typeof import('./src/components/StyleImporter.vue')['default']
     Submission: typeof import('./src/components/Submission.vue')['default']
     Tree: typeof import('./src/components/Tree.vue')['default']
+    Visualization: typeof import('./src/components/Visualization.vue')['default']
   }
 }

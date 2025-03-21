@@ -291,7 +291,7 @@ const infographicLayoutData: Infographic = {
     color: [51, 51, 51],
     font: "Gill Sans",
     "font-size": 18,
-    coordinates: [[0, 0], [628, 0], [0, 119], [628, 119]]
+    coordinates: [[0, 0], [628, 0], [0, 189], [628, 189]]
   },
   VGs: [
     {

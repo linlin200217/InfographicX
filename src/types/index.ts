@@ -1,9 +1,19 @@
+export interface Visualization {
+  is_visualization: boolean; // 是否存在可视化
+  type: 'pie_chart' | 'bar_chart' | 'line_chart' | 'timeline' | 'icon_array' | 'textual' | null;
+  data: Array<{
+    key: string;
+    value: number;
+  }>;
+}
+
 export interface Knowledge {
   knowledge_content: string;
   data_insight: string;
   first_level_highlight: string;
   second_level_highlight: string;
   icon_keyword: string;
+  visualization: Visualization;
 }
 
 export interface RelatedSubtask {
