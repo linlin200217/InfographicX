@@ -10,10 +10,15 @@
   },
   "dependencies": {
     "@ckpack/vue-color": "^1.6.0",
+    "@svgdotjs/svg.draggable.js": "^3.0.6",
+    "@svgdotjs/svg.js": "^3.2.4",
+    "@svgdotjs/svg.resize.js": "^2.0.5",
+    "@svgdotjs/svg.select.js": "^4.0.2",
     "@tailwindcss/vite": "^4.0.8",
     "@types/d3": "^7.4.3",
     "axios": "^1.8.2",
     "d3": "^7.9.0",
+    "fabric": "^6.6.1",
     "pinia": "^3.0.1",
     "tailwindcss": "^4.0.8",
     "vis-data": "^7.1.9",
@@ -24,6 +29,7 @@
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "@types/axios": "^0.14.4",
+    "@types/fabric": "^5.3.10",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
     "element-plus": "^2.9.5",
