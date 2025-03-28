@@ -51,6 +51,7 @@ const drawChart = () => {
   const inputData = props.visualization;
   const colorPalette = ["#7C5959","#5C4141", "#9F7979", "#C9ABAB", "#EEE1E1",
   ];
+  
 
   // 如果不需要可视化或没有指定类型，则显示提示文字
   if (!inputData.is_visualization || !inputData.type) {

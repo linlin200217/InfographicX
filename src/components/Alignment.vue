@@ -173,12 +173,13 @@ import { useStyleStore } from '../stores/styleStore';
 import { useRankStore } from '../stores/rankStore';
 import { notify } from '../utils/notification';
 import Visualization from '../components/Visualization.vue';
+import { useHeightWidthStore } from '../stores/heightWidth';
 
 // 使用 Pinia store
 const uploadStore = useUploadStore();
 const styleStore = useStyleStore();
 const rankStore = useRankStore();
-
+const heightWidthStore = useHeightWidthStore();
 
 // 从 store 获取标题
 const titleRef = ref<string>("");
@@ -411,8 +412,19 @@ onMounted(() => {
     scrollContainerRef.value.addEventListener('scroll', updateConnections);
   }
 });
-const width = ref(628);
-const height = ref(1200);
+
+
+const height = ref(1000);
+const width = ref(600);
+
+watch(height, (newHeight) => {
+  heightWidthStore.setHeight(newHeight);
+});
+
+watch(width, (newWidth) => {
+  heightWidthStore.setWidth(newWidth);
+});
+
 const handleNextStep = async() => {
   console.log("handleNextStep");
   try {
@@ -426,7 +438,7 @@ const handleNextStep = async() => {
     await styleStore.generateColors(uploadStore.uploadResult);
     
     // 获取信息图尺寸（这里使用默认尺寸，你可以根据实际需求调整）
-    const infographicSize: [number, number] = [width.value, height.value];
+    const infographicSize: [number, number] = [heightWidthStore.width, heightWidthStore.height];
     await rankStore.rankElements(uploadStore.uploadResult, infographicSize);
   } catch (error) {
     console.error('生成颜色方案或排序失败:', error);

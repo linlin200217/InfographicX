@@ -47,15 +47,18 @@
   import Color from "./components/Color.vue";
   import Submission from "./components/Submission.vue";
   import { useUploadStore } from './stores/uploadStore'
-
+  import { useLayoutStore } from './stores/layout'
+  import { submitLayout } from './api/layout'
   // 使用 Pinia store
   const uploadStore = useUploadStore()
+  const layoutStore = useLayoutStore()
 
   const handleUploadSuccess = (result: any) => {
     console.log(result);
     // 直接更新 store 中的数据
     uploadStore.uploadResult = result;
   }
+
 
 </script>
 
