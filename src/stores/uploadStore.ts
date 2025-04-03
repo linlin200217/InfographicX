@@ -11,6 +11,7 @@ export const useUploadStore = defineStore('upload', () => {
   const isUploading = ref<boolean>(false)
   const uploadResult = ref<any | null>(null)
   const uploadError = ref<Error | null>(null)
+  const colorRes = ref<any | null>(null)
 
   // 设置文件
   function setFile(newFile: File | null) {
@@ -35,6 +36,10 @@ export const useUploadStore = defineStore('upload', () => {
     showFileIcon.value = false
     uploadResult.value = null
     uploadError.value = null
+  }
+
+  function setColorRes(colorRes: any) {
+    colorRes.value = colorRes
   }
 
   // 上传文件和问题
@@ -74,12 +79,14 @@ export const useUploadStore = defineStore('upload', () => {
     showFileIcon,
     isUploading,
     uploadResult,
+    colorRes,
     uploadError,
     
     // 方法
     setFile,
     setQuestion,
     clearState,
-    uploadFileWithQuestion
+    uploadFileWithQuestion,
+    setColorRes,
   }
 }) 

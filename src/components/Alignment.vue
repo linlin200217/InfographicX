@@ -301,10 +301,38 @@ const applyFormat = (groupIndex: number, kIndex: number, type: string) => {
   });
 };
 
-// 修改知识内容
-const updateKnowledgeContent = (groupIndex: number, knowledgeIndex: number, event: Event) => {
+
+function saveCursorPosition(containerEl) {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    return {
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+      container: range.startContainer
+    };
+  }
+  return null;
+}
+
+function restoreCursorPosition(pos) {
+  if (!pos) return;
+  const range = document.createRange();
+  range.setStart(pos.container, pos.startOffset);
+  range.setEnd(pos.container, pos.endOffset);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+
+
+const updateKnowledgeContent = (groupIndex, knowledgeIndex, event) => {
+  // 保存光标位置
+  const cursorPos = saveCursorPosition(event.target);
+  
   // 获取纯文本内容（去除HTML标签）
-  const htmlContent = (event.target as HTMLElement).innerHTML;
+  const htmlContent = event.target.innerHTML;
   const textContent = extractTextFromHtml(htmlContent);
   
   // 检查内容是否真的发生了变化
@@ -322,14 +350,18 @@ const updateKnowledgeContent = (groupIndex: number, knowledgeIndex: number, even
     textContent
   );
   
-  // 强制更新视图
+  // 强制更新视图，并恢复光标位置
   nextTick(() => {
     if (uploadStore.uploadResult?.data) {
       // 触发深层更新
       uploadStore.uploadResult = { ...uploadStore.uploadResult };
     }
+    // 恢复光标位置
+    restoreCursorPosition(cursorPos);
+    
   });
 };
+
 
 const containerRef = ref<HTMLElement | null>(null);
 const scrollContainerRef = ref<HTMLElement | null>(null);
@@ -396,6 +428,7 @@ const deleteVisualization = (groupIndex: number, knowledgeIndex: number) => {
   updateConnections();
 };
 
+
 // 更新标题
 const updateTitle = (value: string) => {
   titleRef.value = value;
@@ -435,8 +468,9 @@ const handleNextStep = async() => {
     }
     // 生成颜色方案
     console.log(uploadStore.uploadResult);
-    await styleStore.generateColors(uploadStore.uploadResult);
-    
+     let colorRes = await styleStore.generateColors(uploadStore.uploadResult);
+     console.log("colorRes-->", colorRes);
+     uploadStore.colorRes = colorRes;
     // 获取信息图尺寸（这里使用默认尺寸，你可以根据实际需求调整）
     const infographicSize: [number, number] = [heightWidthStore.width, heightWidthStore.height];
     await rankStore.rankElements(uploadStore.uploadResult, infographicSize);

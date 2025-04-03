@@ -9,6 +9,7 @@ export const createAxiosClient = (config?: AxiosRequestConfig): AxiosInstance =>
     timeout: 1000*60*10,
     headers: {
       'Content-Type': 'application/json',
+      "access-control-allow-origin": "*",
     },
     // 合并用户提供的配置
     ...config,
@@ -28,3 +29,4 @@ export type { AxiosInstance, AxiosRequestConfig, AxiosResponse };
 export * from './color';
 export * from './rank';
 export * from './upload';
+export * from './icon';

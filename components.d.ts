@@ -8,10 +8,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    2: typeof import('./src/components/Canva copy 2.vue')['default']
     Alignment: typeof import('./src/components/Alignment.vue')['default']
     Baseframe: typeof import('./src/components/Baseframe.vue')['default']
     Canva: typeof import('./src/components/Canva.vue')['default']
+    'Canva copy': typeof import('./src/components/Canva copy.vue')['default']
+    Canva3: typeof import('./src/components/Canva3.vue')['default']
     Color: typeof import('./src/components/Color.vue')['default']
+    copy: typeof import('./src/components/Visualization copy.vue')['default']
     ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
     ElProgress: typeof import('element-plus/es')['ElProgress']
     Header: typeof import('./src/components/Header.vue')['default']
@@ -21,6 +25,8 @@ declare module 'vue' {
     Notification: typeof import('./src/components/Notification.vue')['default']
     StyleImporter: typeof import('./src/components/StyleImporter.vue')['default']
     Submission: typeof import('./src/components/Submission.vue')['default']
+    T1: typeof import('./src/components/test1/t1.vue')['default']
+    TLay: typeof import('./src/components/test1/tLay.vue')['default']
     Tree: typeof import('./src/components/Tree.vue')['default']
     Visualization: typeof import('./src/components/Visualization.vue')['default']
   }

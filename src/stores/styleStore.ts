@@ -197,3 +197,4 @@ export const useStyleStore = defineStore('style', () => {
     generateColors
   }
 })
+

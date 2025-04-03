@@ -10,14 +10,26 @@
 import { useLayoutStore } from '../stores/layout';
 import { submitLayout } from '../api/layout';
 import { useUploadStore } from '../stores/uploadStore';
+import { ElMessage } from 'element-plus';
 
+const emit = defineEmits(['submitSuccess']);
 const layoutStore = useLayoutStore();
 const uploadStore = useUploadStore();
 
 const handleSubmitLayout = async () => {
     console.log('submitLayout');
+    
+    // Add validation for Star layout
+    if (layoutStore.type === 'Star' && !layoutStore.layoutData?.VisualizationIcon) {
+        ElMessage.error('该布局需要提供可视化图表参数');
+        return;
+    }
+
     const response = await submitLayout(layoutStore.type, layoutStore.layoutData, uploadStore.uploadResult);
     console.log(response);
+    console.log(response.new_layout)
+    console.log(response.new_paser_result)
+
 }
 
 
