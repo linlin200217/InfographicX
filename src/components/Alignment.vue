@@ -301,38 +301,10 @@ const applyFormat = (groupIndex: number, kIndex: number, type: string) => {
   });
 };
 
-
-function saveCursorPosition(containerEl) {
-  const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0);
-    return {
-      startOffset: range.startOffset,
-      endOffset: range.endOffset,
-      container: range.startContainer
-    };
-  }
-  return null;
-}
-
-function restoreCursorPosition(pos) {
-  if (!pos) return;
-  const range = document.createRange();
-  range.setStart(pos.container, pos.startOffset);
-  range.setEnd(pos.container, pos.endOffset);
-  const selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
-
-
-
-const updateKnowledgeContent = (groupIndex, knowledgeIndex, event) => {
-  // 保存光标位置
-  const cursorPos = saveCursorPosition(event.target);
-  
+// 修改知识内容
+const updateKnowledgeContent = (groupIndex: number, knowledgeIndex: number, event: Event) => {
   // 获取纯文本内容（去除HTML标签）
-  const htmlContent = event.target.innerHTML;
+  const htmlContent = (event.target as HTMLElement).innerHTML;
   const textContent = extractTextFromHtml(htmlContent);
   
   // 检查内容是否真的发生了变化
@@ -350,18 +322,14 @@ const updateKnowledgeContent = (groupIndex, knowledgeIndex, event) => {
     textContent
   );
   
-  // 强制更新视图，并恢复光标位置
+  // 强制更新视图
   nextTick(() => {
     if (uploadStore.uploadResult?.data) {
       // 触发深层更新
       uploadStore.uploadResult = { ...uploadStore.uploadResult };
     }
-    // 恢复光标位置
-    restoreCursorPosition(cursorPos);
-    
   });
 };
-
 
 const containerRef = ref<HTMLElement | null>(null);
 const scrollContainerRef = ref<HTMLElement | null>(null);
@@ -427,7 +395,6 @@ const deleteVisualization = (groupIndex: number, knowledgeIndex: number) => {
   
   updateConnections();
 };
-
 
 // 更新标题
 const updateTitle = (value: string) => {

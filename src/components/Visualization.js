@@ -43,7 +43,6 @@ export const drawChart = (visualization, width, height, themeColors) => {
 
   const type = inputData.type;
 
-
   if (type === "pie_chart") {
     const data = inputData.data;
     const radius = (Math.min(effectiveWidth, effectiveHeight) / 2) * 0.85;
@@ -54,7 +53,6 @@ export const drawChart = (visualization, width, height, themeColors) => {
       .value((d) => d.value)
       .startAngle(0)
       .endAngle(2 * Math.PI);
-      
     const arc = d3.arc().innerRadius(0).outerRadius(radius);
     const arcs = g.selectAll("arc").data(pie(data)).enter().append("g").attr("class", "arc");
     arcs
@@ -63,11 +61,11 @@ export const drawChart = (visualization, width, height, themeColors) => {
       .attr("fill", (d, i) => colorPalette[i % colorPalette.length])
       .attr("stroke", (d, i) => colorPalette[i % colorPalette.length])
       .attr("stroke-width", 2);
-    //arcs
-      //.append("text")
-      //.attr("transform", (d) => `translate(${arc.centroid(d)})`)
-      //.attr("text-anchor", "middle")
-      //.text((d) => d.data.key);
+    arcs
+      .append("text")
+      .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+      .attr("text-anchor", "middle")
+      .text((d) => d.data.key);
     return arcs;
   } else if (type === "bar_chart") {
     const data = inputData.data;

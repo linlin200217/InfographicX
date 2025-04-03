@@ -27,9 +27,13 @@ const handleSubmitLayout = async () => {
 
     const response = await submitLayout(layoutStore.type, layoutStore.layoutData, uploadStore.uploadResult);
     console.log(response);
-    console.log(response.new_layout)
-    console.log(response.new_paser_result)
+    if (response === 'ok') {
+        ElMessage.success('提交成功');
+        emit('submitSuccess');
 
+    } else {
+        ElMessage.error('提交失败');
+    }
 }
 
 

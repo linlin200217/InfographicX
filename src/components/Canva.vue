@@ -97,7 +97,6 @@
       if (target) {
         // 检查是否是生成的对象
         if (target.generatedFromData) {
-
           // 获取或创建对象ID
           let objectId = target.id;
           if (!objectId) {
@@ -252,14 +251,14 @@
         // VG Subtitle
         if (vgData.Subtitle) {
           const subtitleRect = createRect(vgData.Subtitle, scaleFactor, offsetX, offsetY, {
-            fill: "#FBFBFB",
+            fill: "#F8F8F8",
             selectable: true,
             hasControls: true,
             tooltipText: `VG${vgIndex}, titleBg`,
             id: `icon-${"titleBg"}-${Date.now()}`,
             tooltipType: "titleBg",
             generatedFromData: true,
-            
+
             titleBg: true,
           });
           if (subtitleRect) {
@@ -271,7 +270,7 @@
             top: vgData.Subtitle[0][1] * scaleFactor + 2,
             width: params.width - 10,
             height: params.height,
-            fontSize: 16, // 初始字体大小（较小值）
+            fontSize: 18, // 初始字体大小（较小值）
             fill: `rgb(${styleStore.secondLevelColor.join(",")})`,
             fontFamily: styleStore.secondLevelFont,
             lineHeight: 1,
@@ -438,11 +437,17 @@
                 params.height,
                 styleStore.themeColors
               );
-              let el = document.createElement("svg");
-              el.width = params.width;
-              el.height = params.height;
-              el.innerHTML = visObj.node().outerHTML;
-              fabric.loadSVGFromString(el.outerHTML).then((o) => {
+
+              let t = jsonVgData.knowledges[kgIndex - 1].visualization.type;
+              let str = t == "pie_chart" || t == "single_pie_chart" ? visObj._parents[0] : visObj.node();
+              // const svgNS = "http://www.w3.org/2000/svg";
+              // let el = document.createElementNS(svgNS, "svg");
+              // el.setAttribute("width", "150");
+              // el.setAttribute("height", "150");
+              // el.appendChild(str);
+              // document.body.appendChild(el);
+
+              fabric.loadSVGFromString(str.outerHTML).then((o) => {
                 // fabric.loadSVGFromString(el.outerHTML,(o,p) => {
                 const group = fabric.util.groupSVGElements(o.objects, o.options);
                 const isPie = jsonVgData.knowledges[kgIndex - 1].visualization.type == "single_pie_chart";
@@ -506,36 +511,36 @@
                 coordinates: kgData.Icon,
               };
               const params = calcRectParams(kgData.Icon, scaleFactor);
-              setTimeout(async () => {
-                const icon = await generateIcon(iconApiObj.keyword, iconApiObj.colorlist, iconApiObj.coordinates);
-                if (icon) {
-                  const blob = new Blob([icon], { type: "image/svg+xml" });
-                  const iconUrl = URL.createObjectURL(blob);
-                  fabric.loadSVGFromURL(iconUrl).then((o) => {
-                    let el = document.createElement("svg");
-                    el.innerHTML = icon;
-                    const group = fabric.util.groupSVGElements(o.objects, o.options);
-                    if (params.width > params.height) {
-                      group.scaleToWidth(params.width);
-                    } else {
-                      group.scaleToHeight(params.height);
-                    }
-                    group.set({
-                      left: offsetX + kgData.Icon[0][0] * scaleFactor + params.width / 2,
-                      top: kgData.Icon[0][1] * scaleFactor + params.height / 2,
-                      originX: "center",
-                      originY: "center",
-                      opacity: 1,
+               setTimeout(async () => {
+                 const icon = await generateIcon(iconApiObj.keyword, iconApiObj.colorlist, iconApiObj.coordinates);
+                 if (icon) {
+                   const blob = new Blob([icon], { type: "image/svg+xml" });
+                   const iconUrl = URL.createObjectURL(blob);
+                   fabric.loadSVGFromURL(iconUrl).then((o) => {
+                     let el = document.createElement("svg");
+                     el.innerHTML = icon;
+                     const group = fabric.util.groupSVGElements(o.objects, o.options);
+                     if (params.width > params.height) {
+                       group.scaleToWidth(params.width);
+                     } else {
+                       group.scaleToHeight(params.height);
+                     }
+                     group.set({
+                       left: offsetX + kgData.Icon[0][0] * scaleFactor + params.width / 2,
+                       top: kgData.Icon[0][1] * scaleFactor + params.height / 2,
+                       originX: "center",
+                       originY: "center",
+                       opacity: 1,
 
-                      generatedFromData: true,
-                      id: `icon-${vgIndex}-${kgKey}-${Date.now()}`,
-                      tooltipText: `VG${vgIndex}, ${kgKey}icon, visualization`,
-                      tooltipType: "visualization",
-                    });
-                    canvasInstance.add(group);
-                  });
-                }
-              }, 0);
+                       generatedFromData: true,
+                       id: `icon-${vgIndex}-${kgKey}-${Date.now()}`,
+                       tooltipText: `VG${vgIndex}, ${kgKey}icon, visualization`,
+                       tooltipType: "visualization",
+                     });
+                     canvasInstance.add(group);
+                   });
+                 }
+               }, 0);
 
               const iconRect = createRect(kgData.Icon, scaleFactor, offsetX, offsetY, {
                 fill: "#EED7D7",
