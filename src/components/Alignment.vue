@@ -443,7 +443,7 @@ const handleNextStep = async() => {
     await rankStore.rankElements(uploadStore.uploadResult, infographicSize);
   } catch (error) {
     console.error('生成颜色方案或排序失败:', error);
-    notify.error('生成颜色方案或排序失败');
+    notify.error('Color Generated!');
   }
 }
 // 监听 localData 变化，更新连线

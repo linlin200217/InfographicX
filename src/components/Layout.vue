@@ -218,6 +218,9 @@ async function handleImageClick(image: { name: string, src: string }) {
   }else if (image.name == 'Landscape') {
     layoutData.value = await layoutRequest('landscape',json_data,[width,height]);
   }
+  else if (image.name == 'Spiral') {
+    layoutData.value = await layoutRequest('spiral',json_data,[width,height]);
+  }
   else {
     console.log('无对应布局数据');
     return;

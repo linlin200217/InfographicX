@@ -4,7 +4,7 @@
             <!-- 文本对象的控制面板 -->
             <div v-if="selectedObject.type === 'textbox' || selectedObject.type === 'i-text'" class="text-controls">
                 <div class="control-group">
-                    <div class="control-label">文本内容</div>
+                    <div class="control-label">Edit Text</div>
                     <textarea
                         class="text-input"
                         :value="selectedObject.text"
@@ -12,7 +12,7 @@
                     ></textarea>
                 </div>
                 <div class="control-group">
-                    <div class="control-label">字体设置</div>
+                    <div class="control-label">Text Font</div>
                     <div class="font-controls">
                         <select 
                             class="font-size-select"
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="control-group">
-                    <div class="control-label">字体颜色</div>
+                    <div class="control-label">Text Color</div>
                     <div class="color-picker-container">
                         <div 
                             class="color-preview"
@@ -67,14 +67,14 @@
                 </div>
 
                 <button @click="showDeleteConfirm = true" class="delete-button">
-                    删除
+                    Delete
                 </button>
             </div>
 
             <!-- 其他类型对象的控制面板 -->
             <div v-else class="other-controls">
                 <div class="control-group">
-                    <label class="control-label">透明度</label>
+                    <label class="control-label">Opacity</label>
                     <input
                         type="range"
                         :value="selectedObject.opacity"
@@ -87,7 +87,7 @@
                 </div>
 
                 <div class="control-group" v-if="selectedObject.tooltipType === 'titleBg'">
-                    <div class="control-label">填充色</div>
+                    <div class="control-label">Color</div>
                     <div class="color-picker-container">
                         <div 
                             class="color-preview"
@@ -106,12 +106,12 @@
                 </div>
 
                 <button @click="showDeleteConfirm = true" class="delete-button">
-                    删除
+                    Delete
                 </button>
             </div>
         </div>
         <div v-else class="no-selection">
-            请选择一个对象
+            InfoAlign
         </div>
 
         <!-- 删除确认弹窗 -->
@@ -159,7 +159,7 @@ const emit = defineEmits<{
 
 const showDeleteConfirm = ref(false);
 const showColorPicker = ref(false);
-const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS' ]
+const availableFonts = ['Arial', 'Verdana', 'Helvetica', 'Courier', 'Consolas', 'cursive', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Palatino', 'Baskerville', 'Gill Sans', 'Andalé Mono', 'Avantgarde', 'Optima', 'Arial Narrow', 'Didot', 'Bookman', 'American Typewriter', 'OCR A Std', 'Brush Script MT', 'Lucida', 'Bradley Hand', 'Trattatello', 'fantasy', 'Harrington', 'Marker Felt', 'Chalkduster', 'Comic Sans MS', 'Tiny5', 'Carter One' , 'Gochi Hand']
 
 const handleOpacityChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -485,5 +485,22 @@ const handleColorPreviewClick = () => {
 .font-size-select:focus,
 .font-family-select:focus {
     border-color: #666;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Carter+One&family=Gochi+Hand&family=Tiny5&display=swap');
+.tiny5-regular {
+  font-family: "Tiny5", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.carter-one-regular {
+  font-family: "Carter One", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.gochi-hand-regular {
+  font-family: "Gochi Hand", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 </style>

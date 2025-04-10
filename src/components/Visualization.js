@@ -61,11 +61,11 @@ export const drawChart = (visualization, width, height, themeColors) => {
       .attr("fill", (d, i) => colorPalette[i % colorPalette.length])
       .attr("stroke", (d, i) => colorPalette[i % colorPalette.length])
       .attr("stroke-width", 2);
-    arcs
-      .append("text")
-      .attr("transform", (d) => `translate(${arc.centroid(d)})`)
-      .attr("text-anchor", "middle")
-      .text((d) => d.data.key);
+    //arcs
+      //.append("text")
+      //.attr("transform", (d) => `translate(${arc.centroid(d)})`)
+      //.attr("text-anchor", "middle")
+      //.text((d) => d.data.key);
     return arcs;
   } else if (type === "bar_chart") {
     const data = inputData.data;
